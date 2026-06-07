@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SpeakMate Academy</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="학습 관리 메뉴">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">SM</div>
+          <div>
+            <p>SpeakMate Academy</p>
+            <span>맞춤형 영어 회화 코칭</span>
+          </div>
+        </div>
+
+        <section class="student-panel">
+          <label for="studentId">Student ID</label>
+          <div class="student-row">
+            <input id="studentId" type="text" value="student-001" autocomplete="off" />
+            <button id="loadStudentButton" class="icon-button small" type="button" aria-label="학생 기록 불러오기">
+              ↻
+            </button>
+          </div>
+          <p id="studentHint">학생별 녹음, 문장, 피드백, 통계를 GitHub 폴더에 저장합니다.</p>
+        </section>
+
+        <section class="github-panel">
+          <p class="panel-title">GitHub Storage</p>
+          <label for="githubToken">Owner token</label>
+          <input id="githubToken" type="password" autocomplete="off" placeholder="fine-grained token" />
+          <label class="check-row">
+            <input id="rememberToken" type="checkbox" />
+            <span>이 브라우저에 토큰 임시 저장</span>
+          </label>
+          <button id="testGithubButton" class="secondary-button" type="button">저장소 연결 확인</button>
+          <p id="githubStatus">저장 위치: student_records/&lt;student-id&gt;/</p>
+        </section>
+
+        <section class="profile-panel">
+          <img id="coachPortrait" src="./assets/coach-female.png" alt="AI 영어 회화 코치" />
+          <div>
+            <p class="eyebrow">오늘의 코치</p>
+            <h1 id="coachName">Mina</h1>
+            <span id="coachBio">친절하지만 정확한 여성 회화 파트너</span>
+          </div>
+        </section>
+
+        <section class="coach-select" aria-label="캐릭터 선택">
+          <p class="panel-title">Character</p>
+          <div class="segmented">
+            <button class="coach-choice is-active" data-coach="female" type="button">여자 코치</button>
+            <button class="coach-choice" data-coach="male" type="button">남자 코치</button>
+          </div>
+        </section>
+
+        <section class="metric-stack" aria-label="학생 통계">
+          <div class="metric">
+            <span>Speaking Score</span>
+            <strong id="scoreValue">82</strong>
+          </div>
+          <div class="metric">
+            <span>Answer Fit</span>
+            <strong id="fitValue">74</strong>
+          </div>
+          <div class="metric">
+            <span>Saved Records</span>
+            <strong id="savedCount">0</strong>
+          </div>
+        </section>
+
+        <section class="scenario-panel">
+          <p class="panel-title">Conversation Scene</p>
+          <div class="scenario-list" role="listbox" aria-label="회화 상황">
+            <button class="scenario-chip is-active" data-scene="cafe" type="button">카페 주문</button>
+            <button class="scenario-chip" data-scene="airport" type="button">공항 입국</button>
+            <button class="scenario-chip" data-scene="meeting" type="button">업무 미팅</button>
+            <button class="scenario-chip" data-scene="travel" type="button">여행 길찾기</button>
+            <button class="scenario-chip" data-scene="shopping" type="button">쇼핑/환불</button>
+            <button class="scenario-chip" data-scene="clinic" type="button">병원/약국</button>
+          </div>
+        </section>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Real-time English Helper</p>
+            <h2><span>질문에 답하고,</span> <span>문장을 고치고, 기록을 관리하세요</span></h2>
+          </div>
+          <div class="session-pill">
+            <span class="pulse-dot" aria-hidden="true"></span>
+            Academy mode
+          </div>
+        </header>
+
+        <section class="coach-stage" aria-label="캐릭터 회화 무대">
+          <div class="stage-visual">
+            <img id="stageCoachPortrait" src="./assets/coach-female.png" alt="AI 영어 회화 코치" />
+            <div class="voice-ring ring-one" aria-hidden="true"></div>
+            <div class="voice-ring ring-two" aria-hidden="true"></div>
+            <div class="wave-bars" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+          <div class="stage-copy">
+            <p class="eyebrow" id="sceneLabel">카페 주문</p>
+            <p class="question-progress" id="questionProgress">Question 1 / 10</p>
+            <h3 id="coachPrompt">Good afternoon. What would you like to order today?</h3>
+            <p id="coachHint">힌트: 원하는 음료, 사이즈, 추가 요청을 한 문장으로 말해보세요.</p>
+            <div class="prompt-tags" id="promptTags" aria-label="답변에 포함하면 좋은 표현"></div>
+            <div class="prompt-support">
+              <div>
+                <span>Expected answer</span>
+                <p id="sampleAnswerText">I would like a large iced latte, please.</p>
+              </div>
+              <div>
+                <span>Extra practice</span>
+                <p id="drillText">같은 주문을 더 공손하게 말해보세요.</p>
+              </div>
+            </div>
+            <div class="stage-actions">
+              <button id="speakPromptButton" class="icon-button" type="button" aria-label="코치 질문 음성 재생">
+                ▶
+              </button>
+              <button id="nextPromptButton" class="text-button" type="button">다음 질문</button>
+            </div>
+          </div>
+        </section>
+
+        <div class="content-grid">
+          <section class="practice-card correction-card">
+            <div class="card-header">
+              <div>
+                <p class="eyebrow">Voice and Sentence Coach</p>
+                <h3>녹음, 답변 적합도, 문장 교정</h3>
+              </div>
+              <span id="recognitionStatus">Ready</span>
+            </div>
+
+            <div class="record-panel">
+              <button id="recordButton" class="record-button" type="button" aria-label="녹음 시작 또는 종료">
+                <span class="record-core" aria-hidden="true"></span>
+              </button>
+              <div>
+                <p id="recordTitle">녹음 시작</p>
+                <span id="recordSubtitle">질문에 맞춰 영어로 답하면 Your Sentence에 실시간으로 반영됩니다.</span>
+              </div>
+            </div>
+
+            <div class="transcript-panel">
+              <span>Live transcript</span>
+              <p id="liveTranscript">녹음 중간 결과가 여기에 표시됩니다.</p>
+              <small id="confidenceText">음성 인식 신뢰도: 대기 중</small>
+            </div>
+
+            <div class="playback-panel">
+              <div>
+                <span>Recorded audio</span>
+                <p id="playbackStatus">아직 재생할 녹음이 없습니다.</p>
+              </div>
+              <audio id="recordingPlayer" controls preload="metadata"></audio>
+            </div>
+
+            <label class="input-label" for="sentenceInput">Your sentence</label>
+            <textarea id="sentenceInput" rows="4" spellcheck="false">I would like a large latte, please.</textarea>
+            <div class="input-actions">
+              <button id="correctButton" class="primary-button" type="button">답변 분석 및 교정</button>
+              <button id="sampleButton" class="secondary-button" type="button">샘플 바꾸기</button>
+              <button id="savePracticeButton" class="secondary-button" type="button">서버 저장</button>
+            </div>
+
+            <div class="analysis-grid" aria-live="polite">
+              <div class="analysis-box">
+                <span>Question Fit</span>
+                <strong id="answerFitScore">74%</strong>
+                <p id="answerFitText">질문에 어느 정도 맞지만, 답변을 더 구체적으로 만들 수 있습니다.</p>
+              </div>
+              <div class="analysis-box">
+                <span>Saved Status</span>
+                <strong id="saveStatus">Not saved</strong>
+                <p id="saveDetail">교정 후 학생 ID로 서버에 저장할 수 있습니다.</p>
+              </div>
+            </div>
+
+            <div class="correction-output" aria-live="polite">
+              <div>
+                <span>Original</span>
+                <p id="originalSentence">I would like a large latte, please.</p>
+              </div>
+              <div class="corrected">
+                <span>Corrected</span>
+                <p id="correctedSentence">I would like a large latte, please.</p>
+              </div>
+              <div>
+                <span>Coach Notes</span>
+                <ul id="coachNotes">
+                  <li>The answer is natural and fits the cafe ordering question.</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          <section class="practice-card chat-card">
+            <div class="card-header">
+              <div>
+                <p class="eyebrow">Character Talk</p>
+                <h3><span id="chatCoachName">Mina</span>와 회화 연습</h3>
+              </div>
+              <span id="chatScene">Cafe</span>
+            </div>
+
+            <div id="chatLog" class="chat-log" aria-live="polite">
+              <article class="message coach">
+                <span>Mina</span>
+                <p>Hi, I am Mina. Answer my question in English, and I will check both meaning and grammar.</p>
+              </article>
+            </div>
+
+            <form id="chatForm" class="chat-form">
+              <input id="chatInput" type="text" autocomplete="off" value="I would like a large latte, please." />
+              <button class="primary-button" type="submit">보내기</button>
+            </form>
+          </section>
+        </div>
+
+        <section class="teacher-board" aria-label="원장 관리 패널">
+          <div class="board-header">
+            <div>
+              <p class="eyebrow">Academy Owner Dashboard</p>
+              <h3>학생 기록, 피드백, 통계 관리</h3>
+            </div>
+            <button id="refreshRecordsButton" class="secondary-button" type="button">기록 새로고침</button>
+          </div>
+
+          <div class="teacher-grid">
+            <div class="records-panel">
+              <div class="mini-header">
+                <span>Practice Records</span>
+                <strong id="recordSummary">0 records</strong>
+              </div>
+              <div id="recordsList" class="records-list">
+                <p class="empty-state">아직 저장된 학생 기록이 없습니다.</p>
+              </div>
+            </div>
+
+            <div class="feedback-panel">
+              <div class="mini-header">
+                <span>Teacher / GPT Feedback Draft</span>
+                <strong id="selectedRecordLabel">No record</strong>
+              </div>
+              <textarea id="teacherFeedback" rows="8" placeholder="원장 피드백 또는 GPT 피드백 초안을 작성하세요."></textarea>
+              <div class="input-actions">
+                <button id="generateFeedbackButton" class="primary-button" type="button">GPT식 피드백 생성</button>
+                <button id="saveFeedbackButton" class="secondary-button" type="button">피드백 저장</button>
+              </div>
+              <p id="feedbackStatus">저장된 기록을 선택하면 피드백을 보낼 수 있습니다.</p>
+            </div>
+
+            <div class="stats-panel">
+              <div class="mini-header">
+                <span>Student Statistics</span>
+                <strong id="avgScore">0%</strong>
+              </div>
+              <dl>
+                <div>
+                  <dt>평균 답변 적합도</dt>
+                  <dd id="avgFit">0%</dd>
+                </div>
+                <div>
+                  <dt>평균 문장 점수</dt>
+                  <dd id="avgGrammar">0%</dd>
+                </div>
+                <div>
+                  <dt>최근 학습 일시</dt>
+                  <dd id="lastPractice">-</dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./curriculum.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
