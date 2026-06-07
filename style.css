@@ -41,6 +41,20 @@ body {
   overflow-x: hidden;
 }
 
+p,
+small,
+li,
+h1,
+h2,
+h3,
+span,
+button,
+input,
+textarea {
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
 button,
 input,
 textarea {
@@ -55,6 +69,20 @@ button {
   display: grid;
   grid-template-columns: minmax(260px, 320px) 1fr;
   min-height: 100vh;
+}
+
+.sidebar,
+.workspace,
+.coach-stage,
+.stage-copy,
+.practice-card,
+.teacher-board,
+.record-panel > div,
+.correction-output > div,
+.message,
+.analysis-box,
+.prompt-support > div {
+  min-width: 0;
 }
 
 .sidebar {
@@ -450,11 +478,13 @@ button {
 }
 
 .stage-copy h3 {
+  width: 100%;
   max-width: 100%;
   margin: 0;
   font-size: clamp(1.65rem, 3vw, 3rem);
   line-height: 1.05;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 
 .stage-copy p:not(.eyebrow) {
@@ -462,6 +492,7 @@ button {
   margin: 0;
   color: var(--muted);
   line-height: 1.7;
+  overflow-wrap: anywhere;
 }
 
 .question-progress {
@@ -525,6 +556,7 @@ button {
   margin: 7px 0 0;
   color: var(--ink) !important;
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .icon-button,
@@ -651,6 +683,7 @@ button {
 .record-panel p {
   margin: 0 0 4px;
   font-weight: 900;
+  overflow-wrap: anywhere;
 }
 
 .transcript-panel {
@@ -667,6 +700,7 @@ button {
   margin: 0;
   color: var(--ink);
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .transcript-panel small {
@@ -833,6 +867,62 @@ textarea:focus,
   border-radius: 8px;
 }
 
+.admin-gate {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(280px, 420px);
+  gap: 18px;
+  align-items: center;
+}
+
+.admin-gate h3 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.admin-gate p:not(.eyebrow) {
+  margin: 8px 0 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.admin-login {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.admin-login input {
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 12px;
+  outline: none;
+}
+
+.admin-login input:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 4px rgba(18, 124, 118, 0.12);
+}
+
+.admin-content {
+  display: grid;
+  gap: 16px;
+}
+
+.teacher-board.is-locked .admin-content {
+  display: none;
+}
+
+.teacher-board.is-locked {
+  box-shadow: none;
+}
+
+.teacher-board.is-open {
+  border-color: rgba(37, 79, 134, 0.24);
+}
+
 .board-header,
 .mini-header {
   display: flex;
@@ -997,8 +1087,16 @@ textarea:focus,
   }
 
   .sidebar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
     border-right: 0;
     border-bottom: 1px solid rgba(18, 124, 118, 0.15);
+  }
+
+  .brand,
+  .scenario-panel {
+    grid-column: 1 / -1;
   }
 
   .profile-panel {
@@ -1013,12 +1111,90 @@ textarea:focus,
   .scenario-panel {
     margin-top: 0;
   }
+
+  .scenario-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .admin-gate,
+  .admin-login {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-login button {
+    width: 100%;
+  }
 }
 
 @media (max-width: 640px) {
+  .app-shell,
+  .sidebar,
+  .workspace,
+  .coach-stage,
+  .content-grid,
+  .teacher-board,
+  .practice-card,
+  .student-panel,
+  .profile-panel,
+  .scenario-panel,
+  .metric,
+  .chat-card,
+  .correction-card {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  .app-shell {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sidebar,
+  .workspace,
+  .coach-stage,
+  .content-grid,
+  .practice-card,
+  .teacher-board {
+    width: 100%;
+  }
+
+  .sidebar > *,
+  .workspace > * {
+    width: 100%;
+    max-width: calc(100vw - 32px);
+    min-width: 0;
+  }
+
+  .practice-card > *,
+  .stage-copy > *,
+  .prompt-support > *,
+  .analysis-grid > *,
+  .correction-output > *,
+  .admin-gate > *,
+  .admin-content > *,
+  .teacher-grid > * {
+    max-width: 100%;
+    min-width: 0;
+  }
+
   .sidebar,
   .workspace {
     padding: 16px;
+  }
+
+  .student-panel,
+  .practice-card,
+  .teacher-board {
+    padding-right: 28px;
+  }
+
+  .prompt-support > div,
+  .record-panel,
+  .transcript-panel,
+  .analysis-box,
+  .correction-output > div,
+  .message {
+    padding-right: 28px;
   }
 
   .topbar,
@@ -1034,12 +1210,22 @@ textarea:focus,
 
   .profile-panel,
   .student-row,
+  .sidebar,
   .scenario-list,
   .segmented,
   .analysis-grid,
   .prompt-support,
   .chat-form {
     grid-template-columns: 1fr;
+  }
+
+  .input-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .input-actions button {
+    width: 100%;
   }
 
   .metric {
@@ -1049,6 +1235,17 @@ textarea:focus,
   }
 
   .student-row .icon-button.small {
+    width: 100%;
+  }
+
+  .board-header,
+  .mini-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .board-header button,
+  .admin-login button {
     width: 100%;
   }
 
@@ -1063,6 +1260,18 @@ textarea:focus,
 
   .topbar h2 span {
     display: block;
+  }
+
+  .stage-copy h3 {
+    font-size: 1.34rem;
+    line-height: 1.24;
+    overflow-wrap: normal;
+    word-break: normal;
+    white-space: normal;
+  }
+
+  .stage-copy {
+    padding: 20px 28px 20px 20px;
   }
 
   .practice-card {
