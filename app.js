@@ -46,6 +46,7 @@ const state = {
   shouldRestartRecognition: false,
   transcriptWatchTimer: null,
   gotTranscript: false,
+  adminUnlocked: false,
   isRecording: false,
   finalTranscript: "",
 };
@@ -111,6 +112,12 @@ const el = {
   avgFit: document.querySelector("#avgFit"),
   avgGrammar: document.querySelector("#avgGrammar"),
   lastPractice: document.querySelector("#lastPractice"),
+  adminSection: document.querySelector("#adminSection"),
+  adminContent: document.querySelector("#adminContent"),
+  adminPassword: document.querySelector("#adminPassword"),
+  adminUnlockButton: document.querySelector("#adminUnlockButton"),
+  adminCollapseButton: document.querySelector("#adminCollapseButton"),
+  adminStatus: document.querySelector("#adminStatus"),
 };
 
 function currentPrompt() {
@@ -124,6 +131,33 @@ function currentScene() {
 
 function sanitizeStudentId(value) {
   return value.trim().replace(/[^\w.-]/g, "-") || "student-001";
+}
+
+function unlockAdmin() {
+  if (el.adminPassword.value !== "REDACTED") {
+    el.adminStatus.textContent = "비밀번호가 맞지 않습니다.";
+    el.adminPassword.select();
+    return;
+  }
+
+  state.adminUnlocked = true;
+  el.adminContent.hidden = false;
+  el.adminSection.classList.remove("is-locked");
+  el.adminSection.classList.add("is-open");
+  el.adminStatus.textContent = "관리자 패널이 열렸습니다. 학생 기록, 피드백, 통계를 관리할 수 있습니다.";
+
+  if (githubToken()) {
+    loadStudentRecords();
+  }
+}
+
+function collapseAdmin() {
+  state.adminUnlocked = false;
+  el.adminContent.hidden = true;
+  el.adminSection.classList.add("is-locked");
+  el.adminSection.classList.remove("is-open");
+  el.adminStatus.textContent = "관리자 패널을 접었습니다. 다시 열려면 비밀번호를 입력하세요.";
+  el.adminPassword.value = "";
 }
 
 function githubToken() {
@@ -819,6 +853,13 @@ function statsForRecords(records) {
 }
 
 async function savePractice() {
+  if (!state.adminUnlocked) {
+    el.saveStatus.textContent = "Admin locked";
+    el.saveDetail.textContent = "저장은 관리자 패널을 열고 GitHub token을 입력한 뒤 사용할 수 있습니다.";
+    el.adminStatus.textContent = "학생 기록 저장을 하려면 비밀번호 REDACTED으로 관리자 패널을 여세요.";
+    return;
+  }
+
   const studentId = sanitizeStudentId(el.studentId.value);
   el.studentId.value = studentId;
 
@@ -845,6 +886,12 @@ async function savePractice() {
 }
 
 async function loadStudentRecords() {
+  if (!state.adminUnlocked) {
+    el.recordSummary.textContent = "Admin locked";
+    el.adminStatus.textContent = "학생 기록 조회는 관리자 패널을 연 뒤 사용할 수 있습니다.";
+    return;
+  }
+
   const studentId = sanitizeStudentId(el.studentId.value);
   el.studentId.value = studentId;
 
@@ -988,6 +1035,13 @@ el.recordButton.addEventListener("click", () => {
 
 el.savePracticeButton.addEventListener("click", savePractice);
 el.loadStudentButton.addEventListener("click", loadStudentRecords);
+el.adminUnlockButton.addEventListener("click", unlockAdmin);
+el.adminCollapseButton.addEventListener("click", collapseAdmin);
+el.adminPassword.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    unlockAdmin();
+  }
+});
 el.testGithubButton.addEventListener("click", testGithubConnection);
 el.githubToken.addEventListener("change", rememberGithubToken);
 el.rememberToken.addEventListener("change", rememberGithubToken);
@@ -1026,8 +1080,9 @@ const rememberedToken = sessionStorage.getItem(TOKEN_STORAGE_KEY);
 if (rememberedToken) {
   el.githubToken.value = rememberedToken;
   el.rememberToken.checked = true;
-  loadStudentRecords();
+  el.githubStatus.textContent = "저장된 GitHub token이 있습니다. 관리자 패널을 열면 기록을 조회합니다.";
 } else {
   el.githubStatus.textContent = "GitHub token을 입력하면 student_records/<student-id>/에 저장됩니다.";
-  renderRecords([], {});
 }
+collapseAdmin();
+renderRecords([], {});

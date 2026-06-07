@@ -25,19 +25,7 @@
               ↻
             </button>
           </div>
-          <p id="studentHint">학생별 녹음, 문장, 피드백, 통계를 GitHub 폴더에 저장합니다.</p>
-        </section>
-
-        <section class="github-panel">
-          <p class="panel-title">GitHub Storage</p>
-          <label for="githubToken">Owner token</label>
-          <input id="githubToken" type="password" autocomplete="off" placeholder="fine-grained token" />
-          <label class="check-row">
-            <input id="rememberToken" type="checkbox" />
-            <span>이 브라우저에 토큰 임시 저장</span>
-          </label>
-          <button id="testGithubButton" class="secondary-button" type="button">저장소 연결 확인</button>
-          <p id="githubStatus">저장 위치: student_records/&lt;student-id&gt;/</p>
+          <p id="studentHint">녹음, 문장 교정, 답변 연습을 진행합니다. 기록 관리는 관리자 영역에서 확인합니다.</p>
         </section>
 
         <section class="profile-panel">
@@ -170,7 +158,7 @@
             <div class="input-actions">
               <button id="correctButton" class="primary-button" type="button">답변 분석 및 교정</button>
               <button id="sampleButton" class="secondary-button" type="button">샘플 바꾸기</button>
-              <button id="savePracticeButton" class="secondary-button" type="button">서버 저장</button>
+              <button id="savePracticeButton" class="secondary-button" type="button">GitHub 저장</button>
             </div>
 
             <div class="analysis-grid" aria-live="polite">
@@ -227,16 +215,42 @@
           </section>
         </div>
 
-        <section class="teacher-board" aria-label="원장 관리 패널">
-          <div class="board-header">
+        <section class="teacher-board is-locked" id="adminSection" aria-label="원장 관리 패널">
+          <div class="admin-gate">
             <div>
               <p class="eyebrow">Academy Owner Dashboard</p>
               <h3>학생 기록, 피드백, 통계 관리</h3>
+              <p id="adminStatus">관리자 비밀번호를 입력하면 관리 패널이 열립니다.</p>
             </div>
-            <button id="refreshRecordsButton" class="secondary-button" type="button">기록 새로고침</button>
+            <div class="admin-login">
+              <input id="adminPassword" type="password" inputmode="numeric" autocomplete="off" placeholder="비밀번호" />
+              <button id="adminUnlockButton" class="primary-button" type="button">관리자 열기</button>
+              <button id="adminCollapseButton" class="secondary-button" type="button">접기</button>
+            </div>
           </div>
 
-          <div class="teacher-grid">
+          <div class="admin-content" id="adminContent" hidden>
+            <section class="github-panel">
+              <p class="panel-title">GitHub Storage</p>
+              <label for="githubToken">Owner token</label>
+              <input id="githubToken" type="password" autocomplete="off" placeholder="fine-grained token" />
+              <label class="check-row">
+                <input id="rememberToken" type="checkbox" />
+                <span>이 브라우저에 토큰 임시 저장</span>
+              </label>
+              <button id="testGithubButton" class="secondary-button" type="button">저장소 연결 확인</button>
+              <p id="githubStatus">저장 위치: student_records/&lt;student-id&gt;/</p>
+            </section>
+
+            <div class="board-header">
+              <div>
+                <p class="eyebrow">Management Tools</p>
+                <h3>학생별 기록과 피드백</h3>
+              </div>
+              <button id="refreshRecordsButton" class="secondary-button" type="button">기록 새로고침</button>
+            </div>
+
+            <div class="teacher-grid">
             <div class="records-panel">
               <div class="mini-header">
                 <span>Practice Records</span>
@@ -279,6 +293,7 @@
                   <dd id="lastPractice">-</dd>
                 </div>
               </dl>
+            </div>
             </div>
           </div>
         </section>
