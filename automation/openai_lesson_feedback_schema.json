@@ -1,0 +1,114 @@
+{
+  "name": "lesson_feedback_analysis",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "student_id",
+      "student_name",
+      "lesson_date",
+      "level",
+      "topic",
+      "summary_ko",
+      "strengths",
+      "improvement_points",
+      "homework",
+      "quiz_items",
+      "recommended_listening"
+    ],
+    "properties": {
+      "student_id": {
+        "type": "string"
+      },
+      "student_name": {
+        "type": "string"
+      },
+      "lesson_date": {
+        "type": "string",
+        "description": "YYYY-MM-DD when available"
+      },
+      "level": {
+        "type": "string",
+        "enum": ["A1", "A2", "B1", "B2", "C1", "unknown"]
+      },
+      "topic": {
+        "type": "string"
+      },
+      "summary_ko": {
+        "type": "string"
+      },
+      "strengths": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "improvement_points": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "homework": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "quiz_items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "word",
+            "meaning_kr",
+            "example_sentence",
+            "question",
+            "answer",
+            "difficulty"
+          ],
+          "properties": {
+            "word": {
+              "type": "string"
+            },
+            "meaning_kr": {
+              "type": "string"
+            },
+            "example_sentence": {
+              "type": "string"
+            },
+            "question": {
+              "type": "string"
+            },
+            "answer": {
+              "type": "string"
+            },
+            "difficulty": {
+              "type": "string",
+              "enum": ["Easy", "Normal", "Hard"]
+            }
+          }
+        }
+      },
+      "recommended_listening": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["level", "topic", "reason"],
+        "properties": {
+          "level": {
+            "type": "string",
+            "enum": ["A1", "A2", "B1", "B2", "C1", "unknown"]
+          },
+          "topic": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

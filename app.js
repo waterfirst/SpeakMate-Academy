@@ -3,6 +3,8 @@ const GITHUB_OWNER = "waterfirst";
 const GITHUB_REPO = "SpeakMate-Academy";
 const GITHUB_BRANCH = "main";
 const TOKEN_STORAGE_KEY = "speakmate_github_token";
+const WEBHOOK_STORAGE_KEY = "speakmate_make_webhook_url";
+const LAUNCH_PARAMS = new URLSearchParams(window.location.search);
 
 const coaches = {
   female: {
@@ -58,6 +60,10 @@ const el = {
   rememberToken: document.querySelector("#rememberToken"),
   testGithubButton: document.querySelector("#testGithubButton"),
   githubStatus: document.querySelector("#githubStatus"),
+  webhookUrl: document.querySelector("#webhookUrl"),
+  rememberWebhook: document.querySelector("#rememberWebhook"),
+  testWebhookButton: document.querySelector("#testWebhookButton"),
+  webhookStatus: document.querySelector("#webhookStatus"),
   coachPortrait: document.querySelector("#coachPortrait"),
   stageCoachPortrait: document.querySelector("#stageCoachPortrait"),
   coachName: document.querySelector("#coachName"),
@@ -162,6 +168,22 @@ function collapseAdmin() {
 
 function githubToken() {
   return el.githubToken.value.trim();
+}
+
+function makeWebhookUrl() {
+  return el.webhookUrl.value.trim();
+}
+
+function rememberWebhookUrl() {
+  if (el.rememberWebhook.checked && makeWebhookUrl()) {
+    sessionStorage.setItem(WEBHOOK_STORAGE_KEY, makeWebhookUrl());
+  } else {
+    sessionStorage.removeItem(WEBHOOK_STORAGE_KEY);
+  }
+}
+
+function buildRecordId(createdAt = new Date().toISOString()) {
+  return `${createdAt.replace(/[^0-9A-Za-z]+/g, "-").replace(/^-|-$/g, "")}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
 function rememberGithubToken() {
@@ -745,14 +767,91 @@ async function postJson(url, payload) {
     throw new Error(await response.text());
   }
 
-  return response.json();
+  const text = await response.text();
+  if (!text) return { ok: true };
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { ok: true, text };
+  }
+}
+
+async function testWebhookConnection() {
+  rememberWebhookUrl();
+
+  if (!makeWebhookUrl()) {
+    el.webhookStatus.textContent = "Make webhook URL을 먼저 입력하세요.";
+    return;
+  }
+
+  el.webhookStatus.textContent = "Make webhook 연결을 확인하고 있습니다.";
+
+  try {
+    await postJson(makeWebhookUrl(), {
+      eventType: "connection_test",
+      source: "SpeakMate Academy",
+      createdAt: new Date().toISOString(),
+      studentId: sanitizeStudentId(el.studentId.value),
+    });
+    el.webhookStatus.textContent = "연결 성공: Make 시나리오가 요청을 받았습니다.";
+  } catch {
+    el.webhookStatus.textContent = "연결 실패: webhook URL, Make 시나리오 활성화, CORS 응답 설정을 확인하세요.";
+  }
+}
+
+async function savePracticeToWebhook(studentId, analysis) {
+  rememberWebhookUrl();
+
+  const createdAt = new Date().toISOString();
+  const recordId = buildRecordId(createdAt);
+  const scene = currentScene();
+  const prompt = currentPrompt();
+  const payload = {
+    eventType: "speaking_practice_saved",
+    source: "SpeakMate Academy",
+    storageProvider: "make_airtable",
+    recordId,
+    studentId,
+    lessonId: LAUNCH_PARAMS.get("lessonId") || "",
+    level: LAUNCH_PARAMS.get("level") || "",
+    createdAt,
+    savedAt: createdAt,
+    pageUrl: window.location.href,
+    sceneKey: state.scene,
+    scene: scene.label,
+    promptIndex: state.promptIndex,
+    prompt: prompt.text,
+    sampleAnswer: prompt.sampleAnswer,
+    drill: prompt.drill,
+    coachKey: state.coach,
+    coachName: coaches[state.coach].name,
+    transcript: analysis.original,
+    corrected: analysis.corrected,
+    notes: analysis.notes,
+    fitScore: analysis.fitScore,
+    grammarScore: analysis.grammarScore,
+    matchedKeywords: analysis.matchedKeywords,
+    missingItems: analysis.missingItems,
+    audioBase64: state.lastAudio?.base64 || null,
+    audioMimeType: state.lastAudio?.mimeType || null,
+  };
+
+  const response = await postJson(makeWebhookUrl(), payload);
+
+  return {
+    ok: true,
+    recordId: response.recordId || recordId,
+    provider: "make_airtable",
+    response,
+  };
 }
 
 async function savePracticeToGithub(studentId, analysis) {
   rememberGithubToken();
 
   const createdAt = new Date().toISOString();
-  const recordId = `${createdAt.replace(/[^0-9A-Za-z]+/g, "-").replace(/^-|-$/g, "")}-${Math.random().toString(36).slice(2, 8)}`;
+  const recordId = buildRecordId(createdAt);
   let audioFile = null;
 
   if (state.lastAudio?.base64) {
@@ -853,18 +952,37 @@ function statsForRecords(records) {
 }
 
 async function savePractice() {
-  if (!state.adminUnlocked) {
-    el.saveStatus.textContent = "Admin locked";
-    el.saveDetail.textContent = "저장은 관리자 패널을 열고 GitHub token을 입력한 뒤 사용할 수 있습니다.";
-    el.adminStatus.textContent = "학생 기록 저장을 하려면 비밀번호 0000으로 관리자 패널을 여세요.";
+  const studentId = sanitizeStudentId(el.studentId.value);
+  el.studentId.value = studentId;
+  const analysis = state.lastAnalysis || analyzeSentence(el.sentenceInput.value);
+  renderAnalysis(analysis, { silentMetric: true });
+
+  if (makeWebhookUrl()) {
+    el.saveStatus.textContent = "Saving";
+    el.saveDetail.textContent = "Make webhook으로 연습 기록을 전송하고 있습니다.";
+
+    try {
+      if (state.audioReadyPromise) {
+        await state.audioReadyPromise;
+      }
+      const saved = await savePracticeToWebhook(studentId, analysis);
+      el.saveStatus.textContent = "Saved";
+      el.saveDetail.textContent = `Make/Airtable 저장 요청 완료: ${saved.recordId}`;
+      el.webhookStatus.textContent = "최근 연습 기록이 Make webhook으로 전송되었습니다.";
+      state.selectedRecordId = saved.recordId;
+    } catch {
+      el.saveStatus.textContent = "Webhook error";
+      el.saveDetail.textContent = "Make webhook URL, 시나리오 활성화, Webhook Response CORS 설정을 확인하세요.";
+    }
     return;
   }
 
-  const studentId = sanitizeStudentId(el.studentId.value);
-  el.studentId.value = studentId;
-
-  const analysis = state.lastAnalysis || analyzeSentence(el.sentenceInput.value);
-  renderAnalysis(analysis, { silentMetric: true });
+  if (!state.adminUnlocked) {
+    el.saveStatus.textContent = "Admin locked";
+    el.saveDetail.textContent = "운영 저장은 Make webhook URL을 입력하면 사용할 수 있습니다. GitHub 저장은 관리자 패널이 필요합니다.";
+    el.adminStatus.textContent = "Make webhook URL을 입력하거나, 비밀번호 0000으로 관리자 패널을 열어 GitHub 저장을 사용하세요.";
+    return;
+  }
 
   el.saveStatus.textContent = "Saving";
   el.saveDetail.textContent = "GitHub student_records 폴더에 학생 기록을 저장하고 있습니다.";
@@ -1045,6 +1163,9 @@ el.adminPassword.addEventListener("keydown", (event) => {
 el.testGithubButton.addEventListener("click", testGithubConnection);
 el.githubToken.addEventListener("change", rememberGithubToken);
 el.rememberToken.addEventListener("change", rememberGithubToken);
+el.testWebhookButton.addEventListener("click", testWebhookConnection);
+el.webhookUrl.addEventListener("change", rememberWebhookUrl);
+el.rememberWebhook.addEventListener("change", rememberWebhookUrl);
 el.refreshRecordsButton.addEventListener("click", loadStudentRecords);
 el.generateFeedbackButton.addEventListener("click", generateFeedbackDraft);
 el.saveFeedbackButton.addEventListener("click", saveFeedback);
@@ -1076,6 +1197,22 @@ el.chatForm.addEventListener("submit", (event) => {
 state.recognition = setupSpeechRecognition();
 renderPromptTags();
 renderAnalysis(analyzeSentence(el.sentenceInput.value), { silentMetric: true });
+const studentIdFromUrl = LAUNCH_PARAMS.get("studentId") || LAUNCH_PARAMS.get("student");
+if (studentIdFromUrl) {
+  el.studentId.value = sanitizeStudentId(studentIdFromUrl);
+}
+const webhookFromUrl = LAUNCH_PARAMS.get("webhookUrl") || LAUNCH_PARAMS.get("webhook") || LAUNCH_PARAMS.get("endpoint");
+const rememberedWebhook = sessionStorage.getItem(WEBHOOK_STORAGE_KEY);
+if (webhookFromUrl) {
+  el.webhookUrl.value = webhookFromUrl;
+  el.webhookStatus.textContent = "URL 파라미터로 Make webhook이 설정되었습니다.";
+} else if (rememberedWebhook) {
+  el.webhookUrl.value = rememberedWebhook;
+  el.rememberWebhook.checked = true;
+  el.webhookStatus.textContent = "저장된 Make webhook URL이 있습니다.";
+} else {
+  el.webhookStatus.textContent = "Make webhook URL을 입력하면 Airtable/Google Drive로 기록을 보낼 수 있습니다.";
+}
 const rememberedToken = sessionStorage.getItem(TOKEN_STORAGE_KEY);
 if (rememberedToken) {
   el.githubToken.value = rememberedToken;
