@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="520" viewBox="0 0 1280 520" role="img" aria-labelledby="title desc">
+  <title id="title">English Academy MVP progress as of 2026-06-21</title>
+  <desc id="desc">Progress diagram showing Airtable and Make completed, Softr student dashboard in progress, and permission filters and teacher dashboard next.</desc>
+  <defs>
+    <style>
+      .bg{fill:#f7faf9}
+      .card{fill:#fff;stroke:#cfdad7;stroke-width:2}
+      .done{fill:#0f8f7b}
+      .doing{fill:#2563eb}
+      .next{fill:#64748b}
+      .muted{fill:#52615d}
+      .title{font:700 34px Arial, sans-serif;fill:#10201c}
+      .h{font:700 24px Arial, sans-serif;fill:#10201c}
+      .p{font:400 17px Arial, sans-serif;fill:#33413d}
+      .small{font:400 14px Arial, sans-serif;fill:#52615d}
+      .badgeText{font:700 14px Arial, sans-serif;fill:white}
+      .line{stroke:#94a3b8;stroke-width:3;stroke-dasharray:7 8}
+    </style>
+  </defs>
+  <rect class="bg" width="1280" height="520" rx="0"/>
+  <text x="56" y="64" class="title">영어학원 AI 학습 대시보드 MVP 진행 현황</text>
+  <text x="58" y="96" class="small">기준일: 2026-06-21 · Google Docs + Make + OpenAI + Airtable + Softr</text>
+  <line x1="180" y1="248" x2="1100" y2="248" class="line"/>
+
+  <g transform="translate(56 140)">
+    <rect class="card" width="250" height="220" rx="18"/>
+    <rect x="22" y="22" width="88" height="28" rx="14" class="done"/>
+    <text x="42" y="42" class="badgeText">완료</text>
+    <text x="24" y="88" class="h">1단계 Airtable</text>
+    <text x="24" y="122" class="p">7개 테이블 구성</text>
+    <text x="24" y="150" class="p">샘플 학생/강사/반 입력</text>
+    <text x="24" y="178" class="p">Lesson Feedback 저장 준비</text>
+  </g>
+
+  <g transform="translate(356 140)">
+    <rect class="card" width="250" height="220" rx="18"/>
+    <rect x="22" y="22" width="88" height="28" rx="14" class="done"/>
+    <text x="42" y="42" class="badgeText">완료</text>
+    <text x="24" y="88" class="h">2단계 자동화</text>
+    <text x="24" y="122" class="p">Google Docs 본문 추출</text>
+    <text x="24" y="150" class="p">OpenAI JSON 생성</text>
+    <text x="24" y="178" class="p">Airtable 저장 성공</text>
+  </g>
+
+  <g transform="translate(656 140)">
+    <rect class="card" width="250" height="220" rx="18"/>
+    <rect x="22" y="22" width="88" height="28" rx="14" class="doing"/>
+    <text x="35" y="42" class="badgeText">진행중</text>
+    <text x="24" y="88" class="h">3단계 Softr 학생</text>
+    <text x="24" y="122" class="p">학생 대시보드 생성</text>
+    <text x="24" y="150" class="p">복습자료 상세 화면</text>
+    <text x="24" y="178" class="p">숙제 제출 폼 성공</text>
+  </g>
+
+  <g transform="translate(956 140)">
+    <rect class="card" width="250" height="220" rx="18"/>
+    <rect x="22" y="22" width="88" height="28" rx="14" class="next"/>
+    <text x="42" y="42" class="badgeText">다음</text>
+    <text x="24" y="88" class="h">4단계 권한/강사</text>
+    <text x="24" y="122" class="p">학생별 로그인 필터</text>
+    <text x="24" y="150" class="p">강사 담당 반 화면</text>
+    <text x="24" y="178" class="p">제출물 확인/다운로드</text>
+  </g>
+
+  <rect x="56" y="406" width="1150" height="58" rx="12" fill="#e9f7f3" stroke="#b8ded5"/>
+  <text x="80" y="442" class="p">현재 통과한 핵심 흐름: 강사 Google Docs 피드백 → Make/OpenAI 처리 → Airtable 저장 → Softr 학생 화면 표시 → 숙제 제출 저장</text>
+</svg>
