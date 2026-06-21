@@ -1,3 +1,7 @@
 preview-*.png
 .DS_Store
 Thumbs.db
+.env
+.env.*
+secrets.json
+**/credentials*

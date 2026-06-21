@@ -89,12 +89,15 @@ proposals/english_academy_mvp_proposal_final_20260621.docx
 
 ## Make / Airtable Storage Notes
 
-SpeakMate 웹앱의 관리자 패널 비밀번호는 `REDACTED`입니다. 관리자 패널에서 Make webhook URL을 넣어 연습기록을 Airtable로 저장할 수 있습니다.
+관리자 패널과 webhook 연동 설정은 별도 비공개 운영 문서에서 관리합니다.
+이 저장소에는 자격 증명(비밀번호, webhook URL, API 토큰)을 포함하지 않습니다.
 
-테스트 URL 예시:
+관리자 접근은 URL 파라미터 `adminPass`로 제어합니다. 운영 URL 예시:
 
 ```text
-?studentId=kim001&lessonId=2026-06-14-B1&level=B1
+?studentId=kim001&lessonId=2026-06-14-B1&level=B1&adminPass=YOUR_SECRET
 ```
 
-브라우저에 노출되는 webhook URL이나 GitHub token은 강한 보안 수단으로 취급하면 안 됩니다. 실제 운영에서는 Softr 로그인 페이지 안에 SpeakMate를 넣고, Make/Airtable에서 학생 ID를 검증해야 합니다.
+실제 운영에서는 Softr 로그인 페이지 안에 SpeakMate를 두고,
+Make/Airtable 단에서 학생 ID를 검증합니다. 클라이언트(브라우저)에
+노출되는 값은 모두 공개 정보로 간주하여 설계합니다.
