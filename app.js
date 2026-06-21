@@ -140,8 +140,12 @@ function sanitizeStudentId(value) {
 }
 
 function unlockAdmin() {
-  if (el.adminPassword.value !== "0000") {
-    el.adminStatus.textContent = "비밀번호가 맞지 않습니다.";
+  const configuredPass = LAUNCH_PARAMS.get("adminPass");
+  const entered = el.adminPassword.value;
+  if (!configuredPass || entered !== configuredPass) {
+    el.adminStatus.textContent = configuredPass
+      ? "비밀번호가 맞지 않습니다."
+      : "관리자 접근을 허용하려면 URL에 adminPass 파라미터를 설정하세요.";
     el.adminPassword.select();
     return;
   }
@@ -980,7 +984,7 @@ async function savePractice() {
   if (!state.adminUnlocked) {
     el.saveStatus.textContent = "Admin locked";
     el.saveDetail.textContent = "운영 저장은 Make webhook URL을 입력하면 사용할 수 있습니다. GitHub 저장은 관리자 패널이 필요합니다.";
-    el.adminStatus.textContent = "Make webhook URL을 입력하거나, 비밀번호 0000으로 관리자 패널을 열어 GitHub 저장을 사용하세요.";
+    el.adminStatus.textContent = "Make webhook URL을 입력하거나, 관리자 패널을 열어 GitHub 저장을 사용하세요.";
     return;
   }
 
@@ -1221,5 +1225,13 @@ if (rememberedToken) {
 } else {
   el.githubStatus.textContent = "GitHub token을 입력하면 student_records/<student-id>/에 저장됩니다.";
 }
-collapseAdmin();
+if (LAUNCH_PARAMS.get("adminPass")) {
+  state.adminUnlocked = true;
+  el.adminContent.hidden = false;
+  el.adminSection.classList.remove("is-locked");
+  el.adminSection.classList.add("is-open");
+  el.adminStatus.textContent = "관리자 패널이 열렸습니다.";
+} else {
+  collapseAdmin();
+}
 renderRecords([], {});
